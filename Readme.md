@@ -7,4 +7,4 @@
 <input type="checkbox">
 <label>Editar um cliente que digitou errado ou mudou alguma informação</label><br>
 <input type="checkbox">
-<label>Excluir um cadastro</label><br># Clients
+<label>Excluir um cadastro</label><br>
