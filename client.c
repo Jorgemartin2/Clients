@@ -129,7 +129,9 @@ int main(int argc, char const *argv[])
                     {
                         client[j] = client[j + 1];
                     }
+                    printf("----------------------------\n");
                     printf("Cliente %s excluido com sucesso!\n", client[i].name);
+                    printf("----------------------------\n");
                     numberCustomers--;
                 }
             }
@@ -140,7 +142,7 @@ int main(int argc, char const *argv[])
             break;
         default:
             printf("Opcao invalida. Digite a opcao correta.\n");
-            printf("-----------------\n");
+            printf("---------------------------\n");
             break;
         }
     } while (option != 5);
