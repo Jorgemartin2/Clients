@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <windows.h>
+//#include <windows.h>
 #include <stdlib.h>
 
 typedef struct
@@ -19,7 +19,7 @@ void deleteCustomer(Clients client[], int *vectorSize);
 int main(int argc, char const *argv[])
 {
     // Seta o idioma para o portugues
-    SetConsoleOutputCP(CP_UTF8);
+    //SetConsoleOutputCP(CP_UTF8);
     Clients client[100];
     int option, numberCustomers = 0;
     do
@@ -93,10 +93,32 @@ void registerCustomer(Clients client[], int vectorSize)
 }
 void viewCustomer(Clients client[], int vectorSize)
 {
-    int i;
+    char aux[50];
+    int i, j;
     printf("---------------------------------------------\n");
     printf("Clientes cadastrados:\n");
     printf("---------------------------------------------\n");
+    //ordenar os clientes por nome
+    for (i = 0; i < vectorSize; i++)
+    {
+        for (j = i + 1; j < vectorSize; j++)
+        {
+            if (strcmp(client[i].name, client[j].name) > 0)
+            {
+                strcpy(aux, client[i].name);
+                strcpy(client[i].name, client[j].name);
+                strcpy(client[j].name, aux);
+                // Também precisamos trocar a idade e o email
+                int tempAge = client[i].age;
+                client[i].age = client[j].age;
+                client[j].age = tempAge;
+                
+                strcpy(aux, client[i].email);
+                strcpy(client[i].email, client[j].email);
+                strcpy(client[j].email, aux);
+            }
+        }
+    }
     for (i = 0; i < vectorSize; i++)
     {
         printf("Nome : %s\n", client[i].name);
@@ -126,7 +148,7 @@ void editCustomer(Clients client[], int vectorSize)
                 client[i].name[strcspn(client[i].name, "\n")] = '\0';
                 printf("Digite a idade : ");
                 scanf("%d", &client[i].age);
-                fflush(stdin);
+                clearInputBuffer();
                 printf("Digite o novo email : ");
                 fgets(client[i].email, 100, stdin);
                 client[i].email[strcspn(client[i].email, "\n")] = '\0';
@@ -134,11 +156,11 @@ void editCustomer(Clients client[], int vectorSize)
                 printf("Cliente %s alterado com sucesso!\n", client[i].name);
                 printf("---------------------------------------------\n");
             }
-            if (!found) // Continua no loop ate o cliente for encontrado
-            {
-                printf("---------------------------------------------\n");
-                printf("Nome inválido. Por favor, digite o nome correto.\n");
-            }
+        }
+        if (!found) // Continua no loop ate o cliente for encontrado
+        {
+            printf("---------------------------------------------\n");
+            printf("Nome inválido. Por favor, digite o nome correto.\n");
         }
     }
 }
