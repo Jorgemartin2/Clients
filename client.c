@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-//#include <windows.h>
+#include <windows.h>
 #include <stdlib.h>
 
 typedef struct
@@ -19,7 +19,7 @@ void deleteCustomer(Clients client[], int *vectorSize);
 int main(int argc, char const *argv[])
 {
     // Seta o idioma para o portugues
-    //SetConsoleOutputCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
     Clients client[100];
     int option, numberCustomers = 0;
     do
@@ -112,7 +112,7 @@ void viewCustomer(Clients client[], int vectorSize)
                 int tempAge = client[i].age;
                 client[i].age = client[j].age;
                 client[j].age = tempAge;
-                
+
                 strcpy(aux, client[i].email);
                 strcpy(client[i].email, client[j].email);
                 strcpy(client[j].email, aux);
