@@ -2,6 +2,9 @@
 #include <string.h>
 #include <windows.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 typedef struct
 {
@@ -11,10 +14,12 @@ typedef struct
 } Clients;
 
 void clearInputBuffer();
-void registerCustomer(Clients client[], int vectorSize);
-void viewCustomer(Clients client[], int sizeVector);
+void registerCustomer(Clients client[], int *vectorSize);
+void viewCustomer(Clients client[], int *vectorSize);
 void editCustomer(Clients client[], int vectorSize);
 void deleteCustomer(Clients client[], int *vectorSize);
+void saveToFile(Clients client[], int vectorSize);
+void loadFromFile(Clients client[], int *vectorSize);
 
 int main(int argc, char const *argv[])
 {
@@ -22,6 +27,7 @@ int main(int argc, char const *argv[])
     SetConsoleOutputCP(CP_UTF8);
     Clients client[100];
     int option, numberCustomers = 0;
+    loadFromFile(client, &numberCustomers);
     do
     {
         printf("1 - Cadastrar um novo cliente.\n");
@@ -32,20 +38,23 @@ int main(int argc, char const *argv[])
         printf("---------------------------------------------\n");
         printf("Selecione a opção : ");
         scanf("%d", &option);
-        clearInputBuffer(); // Limpa o buffer após a entrada de dados
+        clearInputBuffer();
         switch (option)
         {
         case 1:
-            registerCustomer(client, numberCustomers++);
+            registerCustomer(client, &numberCustomers);
+            saveToFile(client, numberCustomers);
             break;
         case 2:
-            viewCustomer(client, numberCustomers);
+            viewCustomer(client, &numberCustomers);
             break;
         case 3:
             editCustomer(client, numberCustomers);
+            saveToFile(client, numberCustomers);
             break;
         case 4:
-            deleteCustomer(client, &numberCustomers); // é passado por referencia, ou seja, o endereçamento de numberCustomer
+            deleteCustomer(client, &numberCustomers);
+            saveToFile(client, numberCustomers);
             break;
         case 5:
             printf("Finalizando o programa...\n");
@@ -65,23 +74,22 @@ void clearInputBuffer()
     while ((c = getchar()) != '\n' && c != EOF)
         ;
 }
-void registerCustomer(Clients client[], int vectorSize)
+void registerCustomer(Clients client[], int *vectorSize)
 {
-    if (vectorSize < 100)
+    if (*vectorSize < 100)
     {
         printf("Digite o nome : ");
-        fgets(client[vectorSize].name, 50, stdin);
-        // Remove o caractere de nova linha que fgets armazena
-        client[vectorSize].name[strcspn(client[vectorSize].name, "\n")] = '\0';
+        fgets(client[*vectorSize].name, sizeof(client[*vectorSize].name), stdin);
+        client[*vectorSize].name[strcspn(client[*vectorSize].name, "\n")] = '\0';
         printf("Digite a idade : ");
-        scanf("%d", &client[vectorSize].age);
+        scanf("%d", &client[*vectorSize].age);
         clearInputBuffer();
         printf("Digite o email : ");
-        fgets(client[vectorSize].email, 100, stdin);
-        client[vectorSize].email[strcspn(client[vectorSize].email, "\n")] = '\0';
-        vectorSize++;
+        fgets(client[*vectorSize].email, sizeof(client[*vectorSize].email), stdin);
+        client[*vectorSize].email[strcspn(client[*vectorSize].email, "\n")] = '\0';
+        (*vectorSize)++;
         printf("---------------------------------------------\n");
-        printf("Cliente %s adicionado com sucesso\n", client[vectorSize - 1].name);
+        printf("Cliente %s adicionado com sucesso\n", client[*vectorSize - 1].name);
         printf("---------------------------------------------\n");
     }
     else
@@ -91,17 +99,17 @@ void registerCustomer(Clients client[], int vectorSize)
         printf("---------------------------------------------\n");
     }
 }
-void viewCustomer(Clients client[], int vectorSize)
+void viewCustomer(Clients client[], int *vectorSize)
 {
     char aux[50];
     int i, j;
     printf("---------------------------------------------\n");
     printf("Clientes cadastrados:\n");
     printf("---------------------------------------------\n");
-    //ordenar os clientes por nome
-    for (i = 0; i < vectorSize; i++)
+    // ordenar os clientes por nome
+    for (i = 0; i < *vectorSize; i++)
     {
-        for (j = i + 1; j < vectorSize; j++)
+        for (j = i + 1; j < *vectorSize; j++)
         {
             if (strcmp(client[i].name, client[j].name) > 0)
             {
@@ -119,7 +127,7 @@ void viewCustomer(Clients client[], int vectorSize)
             }
         }
     }
-    for (i = 0; i < vectorSize; i++)
+    for (i = 0; i < *vectorSize; i++)
     {
         printf("Nome : %s\n", client[i].name);
         printf("Idade : %d\n", client[i].age);
@@ -164,7 +172,7 @@ void editCustomer(Clients client[], int vectorSize)
         }
     }
 }
-void deleteCustomer(Clients client[], int *vectorSize) // vetor é atualizado na função deleteCustomer via ponteiro, o que garante que a mudança seja refletida fora da função, no main.
+void deleteCustomer(Clients client[], int *vectorSize)
 {
     char name[100];
     int found = 0; // Variável para controlar se o cliente foi encontrado
@@ -180,7 +188,7 @@ void deleteCustomer(Clients client[], int *vectorSize) // vetor é atualizado na
             // Compara se o dado de entrada é igual ao que estiver armazenado, se sim, a função strcmp retorna 0.
             if (strcmp(client[i].name, name) == 0)
             {
-                printf("Deseja realmente excluir o cliente %s ?(Digite 1 para SIM e 0 para NÃO)\n", client[i].name);
+                printf("Deseja realmente excluir o cliente %s ?(Digite 1 para SIM e 0 para NÃO) ", client[i].name);
                 scanf("%d", &confirm);
                 clearInputBuffer();
                 if (confirm == 1)
@@ -212,4 +220,67 @@ void deleteCustomer(Clients client[], int *vectorSize) // vetor é atualizado na
             printf("Nome inválido. Por favor, digite o nome correto.\n");
         }
     }
+}
+void saveToFile(Clients client[], int vectorSize)
+{ // variável do tipo struct stat para armazenar o estado da pasta.
+    struct stat st = {0};
+// verifica o sistema operacional que esta rodando
+#ifdef __linux
+    // Colocamos as informações da pasta escolhida na variável "st" e verificamos. Se o retorno for -1 significa que o diretório não existe e se for 0 o diretório existe.
+    if (stat("/tmp/client", &st) == -1)
+    {
+        // Cria o diretório passando como primeiro argumento onde a pasta sera criada e o segundo as permissões.
+        if (mkdir("/tmp/client", 0700) == 0)
+        {
+            printf("Diretorio criado\n");
+        }
+    }
+    FILE *file = fopen("/tmp/client/clientes.txt", "w");
+#elif _WIN32
+    if (stat("C:/Client", &st) == -1)
+    {
+        if (mkdir("C:/Client") == 0)
+        {
+            printf("Diretorio criado\n");
+        }
+    }
+    FILE *file = fopen("C:/Client/clientes.txt", "w");
+#else
+    printf("Sistema não reconhecido.");
+#endif
+    if (file == NULL)
+    {
+        printf("Não foi possível abrir o arquivo para escrita.\n");
+        return;
+    }
+    for (int i = 0; i < vectorSize; i++)
+    {
+        fprintf(file, "%s\n%d\n%s\n", client[i].name, client[i].age, client[i].email);
+    }
+
+    fclose(file);
+}
+void loadFromFile(Clients client[], int *vectorSize)
+{
+#ifdef _WIN32
+    FILE *file = fopen("C:/Client/clientes.txt", "r");
+#elif __linux
+    FILE *file = fopen("/tmp/client/clientes.txt", "r");
+#else
+    printf("Sistema não reconhecido.");
+#endif
+    if (file == NULL)
+    {
+        printf("Não foi possível abrir o arquivo para leitura.\n");
+        return;
+    }
+    // enquanto não for o fim do arquivo, o loop continua sendo executado
+    // le e armazena os dados da entrada
+    // adiciona sempre +1 no tamanho do vetor
+    while (fscanf(file, "%49[^\n]\n%d\n%99[^\n]\n", client[*vectorSize].name, &client[*vectorSize].age, client[*vectorSize].email) != EOF)
+    {
+        (*vectorSize)++;
+    }
+
+    fclose(file);
 }
