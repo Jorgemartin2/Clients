@@ -1,6 +1,8 @@
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include <stdio.h>
 #include <string.h>
-#include <windows.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -9,8 +11,13 @@
 typedef struct
 {
     char name[50];
-    int age;
     char email[100];
+    char adress[100];
+    char sex[2];
+    char cpf[15];
+    char telphone[15];
+    int age;
+    int day, month, year;
 } Clients;
 
 void clearInputBuffer();
@@ -23,8 +30,10 @@ void loadFromFile(Clients client[], int *vectorSize);
 
 int main(int argc, char const *argv[])
 {
+#ifdef _WIN32
     // Seta o idioma para o portugues
     SetConsoleOutputCP(CP_UTF8);
+#endif
     Clients client[100];
     int option, numberCustomers = 0;
     loadFromFile(client, &numberCustomers);
@@ -81,12 +90,34 @@ void registerCustomer(Clients client[], int *vectorSize)
         printf("Digite o nome : ");
         fgets(client[*vectorSize].name, sizeof(client[*vectorSize].name), stdin);
         client[*vectorSize].name[strcspn(client[*vectorSize].name, "\n")] = '\0';
+        printf("Data de nascimento\n");
+        printf("Digite o dia : ");
+        scanf("%d", &client[*vectorSize].day);
+        clearInputBuffer();
+        printf("Digite o mês : ");
+        scanf("%d", &client[*vectorSize].month);
+        clearInputBuffer();
+        printf("Digite o ano : ");
+        scanf("%d", &client[*vectorSize].year);
+        clearInputBuffer();
+        printf("CPF : ");
+        fgets(client[*vectorSize].cpf, sizeof(client[*vectorSize].cpf), stdin);
+        client[*vectorSize].cpf[strcspn(client[*vectorSize].cpf, "\n")] = '\0';
         printf("Digite a idade : ");
         scanf("%d", &client[*vectorSize].age);
         clearInputBuffer();
+        printf("Digite o numero de telefone : ");
+        fgets(client[*vectorSize].telphone, sizeof(client[*vectorSize].telphone), stdin);
+        client[*vectorSize].telphone[strcspn(client[*vectorSize].telphone, "\n")] = '\0';
+        printf("Digite o endereço : ");
+        fgets(client[*vectorSize].adress, sizeof(client[*vectorSize].adress), stdin);
+        client[*vectorSize].adress[strcspn(client[*vectorSize].adress, "\n")] = '\0';
         printf("Digite o email : ");
         fgets(client[*vectorSize].email, sizeof(client[*vectorSize].email), stdin);
         client[*vectorSize].email[strcspn(client[*vectorSize].email, "\n")] = '\0';
+        printf("Digite o sexo(M ou F) : ");
+        fgets(client[*vectorSize].sex, sizeof(client[*vectorSize].sex), stdin);
+        client[*vectorSize].sex[strcspn(client[*vectorSize].sex, "\n")] = '\0';
         (*vectorSize)++;
         printf("---------------------------------------------\n");
         printf("Cliente %s adicionado com sucesso\n", client[*vectorSize - 1].name);
@@ -101,6 +132,13 @@ void registerCustomer(Clients client[], int *vectorSize)
 }
 void viewCustomer(Clients client[], int *vectorSize)
 {
+    if (*vectorSize == 0)
+    {
+        printf("---------------------------------------------\n");
+        printf("Nenhum cliente cadastrado.\n");
+        printf("---------------------------------------------\n");
+        return;
+    }
     char aux[50];
     int i, j;
     printf("---------------------------------------------\n");
@@ -116,22 +154,55 @@ void viewCustomer(Clients client[], int *vectorSize)
                 strcpy(aux, client[i].name);
                 strcpy(client[i].name, client[j].name);
                 strcpy(client[j].name, aux);
-                // Também precisamos trocar a idade e o email
+
+                int tempDay = client[i].day;
+                client[i].day = client[j].day;
+                client[j].day = tempDay;
+
+                int tempMonth = client[i].month;
+                client[i].month = client[j].month;
+                client[j].month = tempMonth;
+
+                int tempYear = client[i].year;
+                client[i].year = client[j].year;
+                client[j].year = tempYear;
+
+                strcpy(aux, client[i].cpf);
+                strcpy(client[i].cpf, client[j].cpf);
+                strcpy(client[j].cpf, aux);
+
                 int tempAge = client[i].age;
                 client[i].age = client[j].age;
                 client[j].age = tempAge;
 
+                strcpy(aux, client[i].telphone);
+                strcpy(client[i].telphone, client[j].telphone);
+                strcpy(client[j].telphone, aux);
+
+                strcpy(aux, client[i].adress);
+                strcpy(client[i].adress, client[j].adress);
+                strcpy(client[j].adress, aux);
+
                 strcpy(aux, client[i].email);
                 strcpy(client[i].email, client[j].email);
                 strcpy(client[j].email, aux);
+
+                strcpy(aux, client[i].sex);
+                strcpy(client[i].sex, client[j].sex);
+                strcpy(client[j].sex, aux);
             }
         }
     }
     for (i = 0; i < *vectorSize; i++)
     {
         printf("Nome : %s\n", client[i].name);
+        printf("Data de nascimento : %d/%d/%d\n", client[i].day, client[i].month, client[i].year);
+        printf("CPF : %s\n", client[i].cpf);
         printf("Idade : %d\n", client[i].age);
+        printf("Telefone : %s\n", client[i].telphone);
+        printf("Endereço : %s\n", client[i].adress);
         printf("Email : %s\n", client[i].email);
+        printf("Sexo : %s\n", client[i].sex);
         printf("---------------------------------------------\n");
     }
 }
@@ -154,12 +225,33 @@ void editCustomer(Clients client[], int vectorSize)
                 printf("Digite o novo nome do cliente : ");
                 fgets(client[i].name, 50, stdin);
                 client[i].name[strcspn(client[i].name, "\n")] = '\0';
+                printf("Digite o dia : ");
+                scanf("%d", &client[i].day);
+                clearInputBuffer();
+                printf("Digite o mês : ");
+                scanf("%d", &client[i].month);
+                clearInputBuffer();
+                printf("Digite o ano : ");
+                scanf("%d", &client[i].year);
+                clearInputBuffer();
+                printf("CPF : ");
+                fgets(client[i].cpf, 15, stdin);
+                client[i].cpf[strcspn(client[i].cpf, "\n")] = '\0';
                 printf("Digite a idade : ");
                 scanf("%d", &client[i].age);
                 clearInputBuffer();
+                printf("Digite o numero de telefone : ");
+                fgets(client[i].telphone, 15, stdin);
+                client[i].telphone[strcspn(client[i].telphone, "\n")] = '\0';
+                printf("Digite o endereço : ");
+                fgets(client[i].adress, sizeof(client[i].adress), stdin);
+                client[i].adress[strcspn(client[i].adress, "\n")] = '\0';
                 printf("Digite o novo email : ");
                 fgets(client[i].email, 100, stdin);
                 client[i].email[strcspn(client[i].email, "\n")] = '\0';
+                printf("Digite o sexo(M ou F) : ");
+                fgets(client[i].sex, sizeof(client[i].sex), stdin);
+                client[i].sex[strcspn(client[i].sex, "\n")] = '\0';
                 printf("---------------------------------------------\n");
                 printf("Cliente %s alterado com sucesso!\n", client[i].name);
                 printf("---------------------------------------------\n");
@@ -255,7 +347,17 @@ void saveToFile(Clients client[], int vectorSize)
     }
     for (int i = 0; i < vectorSize; i++)
     {
-        fprintf(file, "%s\n%d\n%s\n", client[i].name, client[i].age, client[i].email);
+        fprintf(file, "%s\n%d\n%d\n%d\n%s\n%d\n%s\n%s\n%s\n%s\n",
+                client[i].name,
+                client[i].day,
+                client[i].month,
+                client[i].year,
+                client[i].cpf,
+                client[i].age,
+                client[i].telphone,
+                client[i].adress,
+                client[i].email,
+                client[i].sex);
     }
 
     fclose(file);
@@ -277,7 +379,17 @@ void loadFromFile(Clients client[], int *vectorSize)
     // enquanto não for o fim do arquivo, o loop continua sendo executado
     // le e armazena os dados da entrada
     // adiciona sempre +1 no tamanho do vetor
-    while (fscanf(file, "%49[^\n]\n%d\n%99[^\n]\n", client[*vectorSize].name, &client[*vectorSize].age, client[*vectorSize].email) != EOF)
+    while (fscanf(file, "%49[^\n]\n%d\n%d\n%d\n%11[^\n]\n%d\n%11[^\n]\n%99[^\n]\n%99[^\n]\n%1[^\n]\n",
+                  client[*vectorSize].name,
+                  &client[*vectorSize].day,
+                  &client[*vectorSize].month,
+                  &client[*vectorSize].year,
+                  client[*vectorSize].cpf,
+                  &client[*vectorSize].age,
+                  client[*vectorSize].telphone,
+                  client[*vectorSize].adress,
+                  client[*vectorSize].email,
+                  client[*vectorSize].sex) != EOF)
     {
         (*vectorSize)++;
     }
