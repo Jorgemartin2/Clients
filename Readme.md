@@ -1,14 +1,30 @@
-# Cadastro de Clientes
+# 🧾 Projeto de Gerenciamento de Clientes
 
-🚀 Projeto básico (CLI) feito para praticar a manipulação de informações em C ainda em fase de desenvolvimento.
+Sistema simples para **cadastro, edição, visualização e exclusão de clientes**, com salvamento automático dos dados em arquivo `.txt`.
 
-## Funcionalidades
+## 💡 Descrição
 
-- [x] Funcionalidade 1: Incluir.
-- [x] Funcionalidade 2: Vizualizar.
-- [x] Funcionalidade 3: Editar.
-- [x] Funcionalidade 4: Excluir.
-- [x] Funcionalidade 5: Exibir os clientes cadastrados em ordem alfabética.
-- [x] Funcionalidade 6: Salvar os dados em um arquivo .txt para que seja feita a manipulação e não seja perdido após ter que encerrar e compilar o projeto novamente.
-- [x] Funcionalidade 7: Adicionado a verificação de sistema operacional para rodar tanto em Windows quanto em Linux. Se for detectado Windows, ele cria a pasta Client com o arquivo clientes.txt no disco C, e se for detectado Linux, ele cria a mesma pasta e arquivo no /tmp.
-- [x] Funcionalidade 8: Adicionar outras entradas de dados, como cpf, data de nascimento, endereço, sexo e telefone. 
+O programa armazena informações como **nome, CPF, data de nascimento, endereço, sexo e telefone**, exibindo os clientes em ordem alfabética.  
+Os dados são salvos em arquivo de texto, garantindo persistência entre execuções.
+
+## 🧠 Compatibilidade
+
+O sistema detecta automaticamente o sistema operacional:
+- **Windows:** cria a pasta `Client` e o arquivo `clientes.txt` no disco `C:`  
+- **Linux:** cria o arquivo em `/tmp/clientes.txt`
+
+## ▶️ Como Executar
+
+```bash
+gcc main.c -o clientes
+./clientes
+```
+
+## 🖥️ Requisitos
+
+- Compilador **C** (GCC, MinGW ou equivalente)  
+- Sistema Operacional: **Windows** ou **Linux**
+
+## 👤 Autor
+
+Desenvolvido por **[Jorge Martin]**
