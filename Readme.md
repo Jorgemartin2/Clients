@@ -27,4 +27,4 @@ gcc main.c -o clientes
 
 ## 👤 Autor
 
-Desenvolvido por **[Jorge Martin]**
+Desenvolvido por **Jorge Martin**
